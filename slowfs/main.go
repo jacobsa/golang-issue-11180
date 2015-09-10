@@ -1,4 +1,4 @@
-// slowfs is a fuse file system that contains now files and supports creating
+// slowfs is a fuse file system that contains nw files and supports creating
 // new ones (that disappear into the void), with a delay while creating in
 // order to reproduce a Go issue involving EINTR errors on Darwin.
 package main

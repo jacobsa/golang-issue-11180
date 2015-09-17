@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"sync"
@@ -13,9 +14,12 @@ import (
 	"github.com/jacobsa/fuse/fuseutil"
 )
 
+var fDelay = flag.Duration(
+	"delay", time.Second, "How long to delay file creation.")
+
 func mount(mountPoint string) (mfs *fuse.MountedFileSystem, err error) {
 	// Create the file system.
-	fs, err := newFileSystem()
+	fs, err := newFileSystem(*fDelay)
 	if err != nil {
 		err = fmt.Errorf("newFileSystem: %v", err)
 		return
@@ -47,14 +51,15 @@ func mount(mountPoint string) (mfs *fuse.MountedFileSystem, err error) {
 type fileSystem struct {
 	fuseutil.NotImplementedFileSystem
 
-	uid uint32
-	gid uint32
+	delay time.Duration
+	uid   uint32
+	gid   uint32
 
 	mu          sync.Mutex
 	nextInodeID fuseops.InodeID
 }
 
-func newFileSystem() (fs *fileSystem, err error) {
+func newFileSystem(delay time.Duration) (fs *fileSystem, err error) {
 	uid, gid, err := myUserAndGroup()
 	if err != nil {
 		err = fmt.Errorf("myUserAndGroup: %v", err)
@@ -62,6 +67,7 @@ func newFileSystem() (fs *fileSystem, err error) {
 	}
 
 	fs = &fileSystem{
+		delay:       delay,
 		uid:         uid,
 		gid:         gid,
 		nextInodeID: fuseops.RootInodeID + 1,
@@ -78,7 +84,7 @@ func (fs *fileSystem) StatFS(
 func (fs *fileSystem) CreateFile(
 	ctx context.Context,
 	op *fuseops.CreateFileOp) (err error) {
-	time.Sleep(time.Second)
+	time.Sleep(fs.delay)
 
 	// Allocate an inode ID.
 	fs.mu.Lock()

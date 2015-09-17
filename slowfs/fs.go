@@ -69,11 +69,15 @@ func newFileSystem() (fs *fileSystem, err error) {
 	return
 }
 
-func (fs *fileSystem) Init(op *fuseops.InitOp) (err error) {
+func (fs *fileSystem) StatFS(
+	ctx context.Context,
+	op *fuseops.StatFSOp) (err error) {
 	return
 }
 
-func (fs *fileSystem) CreateFile(op *fuseops.CreateFileOp) (err error) {
+func (fs *fileSystem) CreateFile(
+	ctx context.Context,
+	op *fuseops.CreateFileOp) (err error) {
 	time.Sleep(time.Second)
 
 	// Allocate an inode ID.
@@ -96,6 +100,7 @@ func (fs *fileSystem) CreateFile(op *fuseops.CreateFileOp) (err error) {
 }
 
 func (fs *fileSystem) GetInodeAttributes(
+	ctx context.Context,
 	op *fuseops.GetInodeAttributesOp) (err error) {
 	// The root directory looks like a directory; everything else looks like a file.
 	var mode os.FileMode
@@ -117,6 +122,7 @@ func (fs *fileSystem) GetInodeAttributes(
 }
 
 func (fs *fileSystem) LookUpInode(
+	ctx context.Context,
 	op *fuseops.LookUpInodeOp) (err error) {
 	// No name exists.
 	err = fuse.ENOENT
